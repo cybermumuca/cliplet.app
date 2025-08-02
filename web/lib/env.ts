@@ -12,6 +12,12 @@ const envSchema = z.object({
   DATABASE_URL: z.url('Invalid Database URL'),
   
   JWT_SECRET: z.string().min(1, 'JWT Secret is required'),
+
+  S3_ENDPOINT: z.string().min(1, 'S3 Endpoint is required'),
+  S3_ACCESS_KEY_ID: z.string().min(1, 'S3 Access Key ID is required'),
+  S3_SECRET_ACCESS_KEY: z.string().min(1, 'S3 Secret Access Key is required'),
+  S3_BUCKET_NAME: z.string().min(1, 'S3 Bucket Name is required'),
+  S3_PUBLIC_URL: z.url('Invalid S3 Public URL'),
 })
 
 export type Env = z.infer<typeof envSchema>

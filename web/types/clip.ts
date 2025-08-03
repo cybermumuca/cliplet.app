@@ -4,7 +4,7 @@ export interface ClipItem {
   id: string;
   type: ClipTypes;
   content: string;
-  filename?: string;
+  fileName?: string;
   createdAt: string;
 }
 

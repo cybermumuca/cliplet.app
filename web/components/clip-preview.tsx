@@ -1,6 +1,6 @@
 "use client";
 
-import { FileIcon, FileTextIcon, ImageIcon, CopyIcon, ClipboardIcon, ClapperboardIcon, HeadphonesIcon } from "lucide-react";
+import { FileIcon, FileTextIcon, ImageIcon, CopyIcon, ClipboardIcon, ClapperboardIcon, HeadphonesIcon, DownloadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -35,6 +35,32 @@ async function copyToClipboard(content: string) {
   }
 }
 
+async function downloadFile(url: string, filename: string) {
+  try {
+    const response = await fetch(url, {
+      credentials: "omit",
+      headers: {}
+    });
+    const blob = await response.blob();
+
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+
+    toast.success("Download iniciado!");
+  } catch (err) {
+    console.error("Falha ao fazer download:", err);
+    toast.error("Não foi possível fazer o download do arquivo.");
+  }
+}
+
 interface ClipPreviewProps {
   clip: ClipItem;
 }
@@ -59,7 +85,7 @@ export function ClipPreview({ clip }: ClipPreviewProps) {
           <div className="relative h-full">
             <img
               src={clip.content}
-              alt={clip.filename || "Imagem"}
+              alt={clip.fileName || "Imagem"}
               className="w-full h-full object-cover rounded-lg"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -79,7 +105,7 @@ export function ClipPreview({ clip }: ClipPreviewProps) {
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
             {getClipIcon(clip.type)}
             <p className="text-xs mt-2 text-center break-all px-2">
-              {clip.filename || 'Arquivo'}
+              {clip.fileName || 'Arquivo'}
             </p>
           </div>
         );
@@ -114,16 +140,23 @@ export function ClipPreview({ clip }: ClipPreviewProps) {
               className="h-8 w-8 bg-background/80 backdrop-blur-sm hover:bg-background"
               onClick={(e) => {
                 e.stopPropagation();
-                copyToClipboard(clip.content);
+
+                if (clip.type === 'text') {
+                  copyToClipboard(clip.content);
+
+                  return;
+                }
+
+                downloadFile(clip.content, clip.fileName || 'arquivo');
               }}
             >
-              <CopyIcon className="h-3 w-3" />
+              {clip.type === "text" ? <CopyIcon className="h-4 w-4" /> : <DownloadIcon className="h-4 w-4" />}
             </Button>
           </div>
 
           <div className="text-white">
             <p className="text-xs font-medium truncate">
-              {clip.filename || (clip.type === 'text' ? 'Texto' : 'Item')}
+              {clip.fileName || (clip.type === 'text' ? 'Texto' : 'Item')}
             </p>
             <p className="text-xs opacity-80">
               {formatTimestamp(clip.createdAt)}

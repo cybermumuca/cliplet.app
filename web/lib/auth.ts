@@ -53,8 +53,19 @@ async function getCurrentUserId(): Promise<Either<AuthError, string>> {
   }
 }
 
-export function withAuth(handler: (request: NextRequest, userId: string) => Promise<NextResponse>) {
-  return async (request: NextRequest) => {
+export function withAuth(
+  handler: (request: NextRequest, userId: string) => Promise<NextResponse>
+): (request: NextRequest) => Promise<NextResponse>;
+
+export function withAuth<T = any>(
+  handler: (request: NextRequest, context: { params: Promise<T> }, userId: string) => Promise<NextResponse>
+): (request: NextRequest, context: { params: Promise<T> }) => Promise<NextResponse>;
+
+export function withAuth<T = any>(
+  handler: ((request: NextRequest, userId: string) => Promise<NextResponse>) |
+    ((request: NextRequest, context: { params: Promise<T> }, userId: string) => Promise<NextResponse>)
+) {
+  return async (request: NextRequest, context: { params?: Promise<T> }) => {
     const getCurrentUserIdResult = await getCurrentUserId();
 
     if (getCurrentUserIdResult.isLeft()) {
@@ -66,6 +77,10 @@ export function withAuth(handler: (request: NextRequest, userId: string) => Prom
 
     const userId = getCurrentUserIdResult.value;
 
-    return handler(request, userId);
+    if (context.params) {
+      return (handler as any)(request, context, userId);
+    }
+
+    return (handler as any)(request, userId);
   };
 }

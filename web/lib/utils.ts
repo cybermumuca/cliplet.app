@@ -14,3 +14,15 @@ export function formatFileSize(bytes: number): string {
     return `${bytes} B`;
   }
 }
+
+export function formatTimestamp(date: string) {
+  const now = new Date();
+  const diff = now.getTime() - new Date(date).getTime();
+  const minutes = Math.floor(diff / (1000 * 60));
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+  if (minutes < 60) return `${minutes}m atrás`;
+  if (hours < 24) return `${hours}h atrás`;
+  return `${days}d atrás`;
+}

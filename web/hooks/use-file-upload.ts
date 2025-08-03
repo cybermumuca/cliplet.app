@@ -1,3 +1,4 @@
+import { Left, Right } from '@/lib/either';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -55,42 +56,75 @@ async function getAudioMetadata(file: File) {
   });
 }
 
+async function getURLUpload(file: File) {
+  try {
+    const uploadResponse = await fetch('/api/clips/upload-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        originalFileName: file.name,
+        originalFileSize: file.size,
+        originalMimeType: file.type
+      })
+    });
+
+    if (!uploadResponse.ok) {
+      return Left.create({
+        code: 'UPLOAD_URL_ERROR',
+        message: 'Erro ao gerar URL de upload'
+      })
+    }
+    const { uploadUrl, fileKey } = await uploadResponse.json();
+
+    return Right.create({ uploadUrl, fileKey });
+  } catch {
+    return Left.create({
+      code: 'UPLOAD_URL_EXCEPTION',
+      message: 'Erro desconhecido ao gerar URL de upload'
+    });
+  }
+}
+
+async function uploadToBucket(uploadURL: string, file: File) {
+  try {
+    const putResponse = await fetch(uploadURL, {
+      method: 'PUT',
+      body: file,
+      headers: { 'Content-Type': file.type, 'Content-Length': String(file.size) }
+    });
+
+    if (!putResponse.ok) {
+      return Left.create({
+        code: 'UPLOAD_ERROR',
+        message: 'Erro ao fazer upload do arquivo'
+      });
+    }
+
+    return Right.create({ success: true });
+  } catch {
+    return Left.create({
+      code: 'UPLOAD_EXCEPTION',
+      message: 'Erro desconhecido ao fazer upload do arquivo'
+    });
+  }
+}
+
 async function uploadFile({ file, detectClipType }: UploadFileParams) {
   // 1. Gerar URL de upload
-  console.log('Iniciando geração de URL de upload do arquivo:', file);
+  const getUploadURLResult = await getURLUpload(file);
 
-  const uploadResponse = await fetch('/api/clips/upload-url', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      originalFileName: file.name,
-      originalFileSize: file.size,
-      originalMimeType: file.type
-    })
-  });
-
-  console.log('URL de upload gerada:', uploadResponse);
-
-  if (!uploadResponse.ok) {
-    throw new Error('Erro ao gerar URL de upload');
+  if (getUploadURLResult.isLeft()) {
+    throw new Error(getUploadURLResult.error.message);
   }
 
-  const { uploadUrl, fileKey } = await uploadResponse.json();
-
-  console.log('URL de upload e chave do arquivo recebidas:', { uploadUrl, fileKey });
+  const { uploadUrl, fileKey } = getUploadURLResult.value;
 
   // 2. Upload do arquivo
-  const putResponse = await fetch(uploadUrl, {
-    method: 'PUT',
-    body: file,
-    headers: { 'Content-Type': file.type, 'Content-Length': String(file.size) }
-  });
+  const uploadResult = await uploadToBucket(uploadUrl, file);
 
-  if (!putResponse.ok) {
-    throw new Error('Erro ao fazer upload do arquivo');
+  if (uploadResult.isLeft()) {
+    throw new Error(uploadResult.error.message);
   }
-
-  console.log('Arquivo enviado para o bucket com sucesso:', putResponse);
 
   // 3. Salvar clip
   const clipType = detectClipType(file);
@@ -113,7 +147,7 @@ async function uploadFile({ file, detectClipType }: UploadFileParams) {
     fileKey,
     fileName: file.name,
     fileSize: file.size,
-    mimeType: file.type,
+    mimeType: file.type ?? undefined,
     originalFileName: file.name,
     ...typeSpecificMetadata,
   };

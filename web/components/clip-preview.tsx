@@ -1,29 +1,27 @@
 "use client";
 
-import { FileIcon, FileTextIcon, ImageIcon, CopyIcon } from "lucide-react";
+import { FileIcon, FileTextIcon, ImageIcon, CopyIcon, ClipboardIcon, ClapperboardIcon, HeadphonesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Item } from "./item";
+import { Clip } from "./clip";
+import { formatTimestamp } from "@/lib/utils";
+import { type ClipItem, type ClipTypes } from "@/types/clip";
 
-interface ClipboardItem {
-  id: string;
-  type: "text" | "file" | "image";
-  content: string;
-  filename?: string;
-  timestamp: string;
-}
-
-function getItemIcon(type: string) {
+function getClipIcon(type: ClipTypes) {
   switch (type) {
     case 'text':
-      return <FileTextIcon className="h-8 w-8" />;
-    case 'file':
-      return <FileIcon className="h-8 w-8" />;
-    case 'image':
+      return <ClipboardIcon className="h-8 w-8" />;
+    case "image":
       return <ImageIcon className="h-8 w-8" />;
-    default:
+    case "video":
+      return <ClapperboardIcon className="h-8 w-8" />;
+    case "audio":
+      return <HeadphonesIcon className="h-8 w-8" />;
+    case "document":
       return <FileTextIcon className="h-8 w-8" />;
+    case "file":
+      return <FileIcon className="h-8 w-8" />;
   }
 }
 
@@ -37,28 +35,22 @@ async function copyToClipboard(content: string) {
   }
 }
 
-function formatTimestamp(date: string) {
-  const now = new Date();
-  const diff = now.getTime() - new Date(date).getTime();
-  const minutes = Math.floor(diff / (1000 * 60));
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-  if (minutes < 60) return `${minutes}m atrás`;
-  if (hours < 24) return `${hours}h atrás`;
-  return `${days}d atrás`;
+interface ClipPreviewProps {
+  clip: ClipItem;
 }
 
-export function ItemPreview({ item }: { item: ClipboardItem }) {
+export function ClipPreview({ clip }: ClipPreviewProps) {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   function renderPreview() {
-    switch (item.type) {
+    switch (clip.type) {
       case 'text':
         return (
           <div className="flex items-start justify-center h-full p-4">
             <p className="text-sm text-start line-clamp-4 break-words text-muted-foreground">
-              {item.content}
+              {clip.content.length > 40
+                ? clip.content.slice(0, 40) + "…"
+                : clip.content}
             </p>
           </div>
         );
@@ -66,8 +58,8 @@ export function ItemPreview({ item }: { item: ClipboardItem }) {
         return (
           <div className="relative h-full">
             <img
-              src={item.content}
-              alt={item.filename || "Imagem"}
+              src={clip.content}
+              alt={clip.filename || "Imagem"}
               className="w-full h-full object-cover rounded-lg"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -82,19 +74,13 @@ export function ItemPreview({ item }: { item: ClipboardItem }) {
             />
           </div>
         );
-      case 'file':
-        return (
-          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-            {getItemIcon(item.type)}
-            <p className="text-xs mt-2 text-center break-all px-2">
-              {item.filename || 'Arquivo'}
-            </p>
-          </div>
-        );
       default:
         return (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            {getItemIcon(item.type)}
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+            {getClipIcon(clip.type)}
+            <p className="text-xs mt-2 text-center break-all px-2">
+              {clip.filename || 'Arquivo'}
+            </p>
           </div>
         );
     }
@@ -110,7 +96,7 @@ export function ItemPreview({ item }: { item: ClipboardItem }) {
 
   return (
     <>
-      <div 
+      <div
         className="group relative aspect-square bg-background/60 backdrop-blur-sm border border-muted rounded-lg overflow-hidden hover:border-border transition-all duration-200 hover:shadow-md cursor-pointer"
         onClick={handleItemClick}
       >
@@ -128,7 +114,7 @@ export function ItemPreview({ item }: { item: ClipboardItem }) {
               className="h-8 w-8 bg-background/80 backdrop-blur-sm hover:bg-background"
               onClick={(e) => {
                 e.stopPropagation();
-                copyToClipboard(item.content);
+                copyToClipboard(clip.content);
               }}
             >
               <CopyIcon className="h-3 w-3" />
@@ -137,19 +123,19 @@ export function ItemPreview({ item }: { item: ClipboardItem }) {
 
           <div className="text-white">
             <p className="text-xs font-medium truncate">
-              {item.filename || (item.type === 'text' ? 'Texto' : 'Item')}
+              {clip.filename || (clip.type === 'text' ? 'Texto' : 'Item')}
             </p>
             <p className="text-xs opacity-80">
-              {formatTimestamp(item.timestamp)}
+              {formatTimestamp(clip.createdAt)}
             </p>
           </div>
         </div>
       </div>
 
-      <Item 
-        item={item} 
-        isOpen={isDetailOpen} 
-        onOpenChange={setIsDetailOpen} 
+      <Clip
+        clipId={clip.id}
+        isOpen={isDetailOpen}
+        onOpenChange={setIsDetailOpen}
       />
     </>
   );

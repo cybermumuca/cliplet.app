@@ -1,6 +1,6 @@
 import { db } from "@/db/connection";
 import { audios } from "@/db/schema/audio";
-import { clips } from "@/db/schema/clip";
+import { clips, clipTypesEnum } from "@/db/schema/clip";
 import { documents } from "@/db/schema/document";
 import { files } from "@/db/schema/file";
 import { images } from "@/db/schema/image";
@@ -8,6 +8,7 @@ import { texts } from "@/db/schema/text";
 import { videos } from "@/db/schema/video";
 import { withAuth } from "@/lib/auth";
 import { env } from "@/lib/env";
+import { and, eq, asc, desc } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = withAuth(async (request: NextRequest, userId: string) => {
@@ -202,4 +203,104 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
     { error: "Tipo de clip não suportado" },
     { status: 400 }
   );
+});
+
+export const GET = withAuth(async (request: NextRequest, userId: string) => {
+  const { searchParams } = new URL(request.url);
+  const filter = searchParams.get("filter") || "all";
+  const sort = searchParams.get("sort") || "asc";
+
+  const whereConditions = [eq(clips.userId, userId)];
+
+  if (filter && filter !== "all") {
+    whereConditions.push(eq(clips.type, filter as "text" | "image" | "video" | "audio" | "document" | "file"));
+  }
+
+  const clipsList = await db
+    .select({
+      id: clips.id,
+      type: clips.type,
+      createdAt: clips.createdAt,
+
+      // Text content
+      textContent: texts.content,
+
+      // Image data
+      imageUrl: images.url,
+      imageFileName: images.originalName,
+
+      // Video data
+      videoUrl: videos.url,
+      videoFileName: videos.originalName,
+
+      // Audio data
+      audioUrl: audios.url,
+      audioFileName: audios.originalName,
+
+      // Document data
+      documentUrl: documents.url,
+      documentFileName: documents.originalName,
+
+      // File data
+      fileUrl: files.url,
+      fileFileName: files.originalName
+    })
+    .from(clips)
+    .leftJoin(texts, eq(clips.id, texts.id))
+    .leftJoin(images, eq(clips.id, images.id))
+    .leftJoin(videos, eq(clips.id, videos.id))
+    .leftJoin(audios, eq(clips.id, audios.id))
+    .leftJoin(documents, eq(clips.id, documents.id))
+    .leftJoin(files, eq(clips.id, files.id))
+    .where(and(...whereConditions))
+    .orderBy(
+      sort === "newest" ? desc(clips.createdAt) : asc(clips.createdAt)
+    );
+
+  const transformedClips = clipsList.map(clip => {
+    const baseClip = {
+      id: clip.id,
+      type: clip.type,
+      createdAt: clip.createdAt,
+    };
+
+    switch (clip.type) {
+      case 'text':
+        return { ...baseClip, content: clip.textContent, fileName: null };
+      case 'image':
+        return {
+          ...baseClip,
+          content: clip.imageUrl,
+          fileName: clip.imageFileName,
+        };
+      case 'video':
+        return {
+          ...baseClip,
+          content: clip.videoUrl,
+          fileName: clip.videoFileName,
+        };
+      case 'audio':
+        return {
+          ...baseClip,
+          content: clip.audioUrl,
+          fileName: clip.audioFileName,
+        };
+      case 'document':
+        return {
+          ...baseClip,
+          content: clip.documentUrl,
+          fileName: clip.documentFileName
+        };
+      case 'file':
+        return {
+          ...baseClip,
+          content: clip.fileUrl,
+          fileName: clip.fileFileName
+        };
+      default:
+        return baseClip;
+    }
+  });
+
+  return NextResponse.json(transformedClips, { status: 200 });
 });

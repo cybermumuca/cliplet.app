@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type FilterValue = 'all' | 'text' | 'file' | 'image'
+export type FilterValue = 'all' | 'text' | 'file' | 'image' | 'video' | 'audio' | 'document'
 
 interface FilterState {
   currentFilter: FilterValue

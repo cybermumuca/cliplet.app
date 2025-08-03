@@ -14,6 +14,8 @@ export const videos = pgTable(
     originalName: varchar("original_name").notNull(),
     url: text("url").notNull(),
     duration: integer("duration").notNull(),
+    width: integer("width"),
+    height: integer("height"),
   },
   (table) => [
     primaryKey({ name: "videos_pk_id", columns: [table.id] }),

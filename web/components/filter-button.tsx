@@ -1,6 +1,6 @@
 "use client";
 
-import { ListFilter, FileText, Image, File, Clipboard as ClipboardIcon } from "lucide-react";
+import { ListFilter, File, Clipboard as ClipboardIcon, ImageIcon, ClapperboardIcon, HeadphonesIcon, FileTextIcon, FileIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -35,8 +35,11 @@ interface FilterOption {
 const filterOptions: FilterOption[] = [
   { label: "Todos os itens", value: "all", icon: <File className="h-4 w-4" /> },
   { label: "Apenas texto", value: "text", icon: <ClipboardIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" /> },
-  { label: "Apenas arquivos", value: "file", icon: <FileText className="h-4 w-4 text-green-600 dark:text-green-400" /> },
-  { label: "Apenas imagens", value: "image", icon: <Image className="h-4 w-4 text-purple-600 dark:text-purple-400" /> },
+  { label: "Apenas imagens", value: "image", icon: <ImageIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" /> },
+  { label: "Apenas vídeos", value: "video", icon: <ClapperboardIcon className="h-4 w-4 text-red-600 dark:text-red-400" /> },
+  { label: "Apenas áudios", value: "audio", icon: <HeadphonesIcon className="h-4 w-4 text-yellow-600 dark:text-yellow-400" /> },
+  { label: "Apenas documentos", value: "document", icon: <FileTextIcon className="h-4 w-4 text-cyan-600 dark:text-cyan-400" /> },
+  { label: "Apenas arquivos", value: "file", icon: <FileIcon className="h-4 w-4 text-green-600 dark:text-green-400" /> },
 ];
 
 export function FilterButton() {
@@ -68,6 +71,9 @@ export function FilterButton() {
                   ${option.value === "text" && "bg-blue-100 dark:bg-blue-900/20"}
                   ${option.value === "file" && "bg-green-100 dark:bg-green-900/20"}
                   ${option.value === "image" && "bg-purple-100 dark:bg-purple-900/20"}
+                  ${option.value === "video" && "bg-red-100 dark:bg-red-900/20"}
+                  ${option.value === "audio" && "bg-yellow-100 dark:bg-yellow-900/20"}
+                  ${option.value === "document" && "bg-cyan-100 dark:bg-cyan-900/20"}
                 `}>
                   {option.icon}
                 </div>
@@ -93,7 +99,9 @@ export function FilterButton() {
             <DrawerTitle>Opções de filtro</DrawerTitle>
             <DrawerDescription>Selecione uma opção de filtro.</DrawerDescription>
           </DrawerHeader>
-          <FilterContent />
+          <div className="overflow-y-scroll">
+            <FilterContent />
+          </div>
           <DrawerFooter>
             <DrawerClose asChild>
               <Button variant="outline" size="lg">Fechar</Button>

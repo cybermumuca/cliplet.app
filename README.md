@@ -17,20 +17,20 @@
 
 ## 🛠️ Stack Tecnológica
 
-- **Next.js 15** - Framework React com App Router
-- **React 19** - Biblioteca de interface do usuário
-- **TypeScript** - Tipagem estática
-- **Tailwind CSS** - Framework de estilização
-- **Radix UI** - Componentes de interface acessíveis
-- **Lucide React** - Ícones modernos
-- **Zustand** - Gerenciamento de estado
-- **TanStack Query** - Gerenciamento de dados e cache
-- **Drizzle ORM** - ORM moderno para TypeScript
-- **PostgreSQL** - Banco de dados relacional
-- **JWT** - Autenticação baseada em tokens
-- **Zod** - Validação de schemas
-- **S3-Compatible Storage** - Armazenamento de arquivos
-- **GitHub OAuth** - Autenticação de usuários
+- **[Next.js 15](https://nextjs.org/)** - Framework React com App Router
+- **[React 19](https://react.dev/)** - Biblioteca de interface do usuário
+- **[TypeScript](https://www.typescriptlang.org/)** - Tipagem estática
+- **[Tailwind CSS](https://tailwindcss.com/)** - Framework de estilização
+- **[Radix UI](https://www.radix-ui.com/)** - Componentes de interface acessíveis
+- **[Lucide React](https://lucide.dev/)** - Ícones modernos
+- **[Zustand](https://zustand-demo.pmnd.rs/)** - Gerenciamento de estado
+- **[TanStack Query](https://tanstack.com/query)** - Gerenciamento de dados e cache
+- **[Drizzle ORM](https://orm.drizzle.team/)** - ORM moderno para TypeScript
+- **[PostgreSQL](https://www.postgresql.org/)** - Banco de dados relacional
+- **[JWT](https://jwt.io/)** - Autenticação baseada em tokens
+- **[Zod](https://zod.dev/)** - Validação de schemas
+- **[S3-Compatible Storage](https://aws.amazon.com/s3/)** - Armazenamento de arquivos
+- **[GitHub OAuth](https://docs.github.com/en/developers/apps/building-oauth-apps)** - Autenticação de usuários
 
 ## 🚀 Instalação e Configuração
 
@@ -116,26 +116,6 @@ A aplicação estará disponível em [http://localhost:3000](http://localhost:30
 
 ## 📊 Banco de Dados
 
-### Schema Principal
-
-```sql
--- Usuários
-users (id, email, name, avatar_url, created_at, updated_at)
-
--- Provedores de autenticação
-user_auth_providers (id, user_id, provider, provider_id, created_at)
-
--- Clips base
-clips (id, type, user_id, created_at, updated_at)
-
--- Tipos específicos de clips
-texts (id, clip_id, content)
-images (id, clip_id, filename, alt_text, width, height)
-videos (id, clip_id, filename, duration, thumbnail_url)
-audios (id, clip_id, filename, duration)
-documents (id, clip_id, filename, page_count)
-files (id, clip_id, filename, file_size, mime_type)
-```
 
 ### Comandos úteis do banco
 

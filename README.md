@@ -2,7 +2,7 @@
 
 **cliplet.app** é uma aplicação web moderna de área de transferência que permite armazenar, organizar e compartilhar diferentes tipos de conteúdo de forma segura e eficiente.
 
-## ✨ Características
+## ✨ Funcionalidades
 
 - 📝 **Texto**: Armazene e gerencie snippets de texto, código e notas
 - 🖼️ **Imagens**: Upload e visualização de imagens com suporte a múltiplos formatos

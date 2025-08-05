@@ -17,7 +17,6 @@
 
 ## 🛠️ Stack Tecnológica
 
-### Frontend
 - **Next.js 15** - Framework React com App Router
 - **React 19** - Biblioteca de interface do usuário
 - **TypeScript** - Tipagem estática
@@ -26,15 +25,10 @@
 - **Lucide React** - Ícones modernos
 - **Zustand** - Gerenciamento de estado
 - **TanStack Query** - Gerenciamento de dados e cache
-
-### Backend
-- **Next.js API Routes** - Endpoints da API
 - **Drizzle ORM** - ORM moderno para TypeScript
 - **PostgreSQL** - Banco de dados relacional
 - **JWT** - Autenticação baseada em tokens
 - **Zod** - Validação de schemas
-
-### Infraestrutura
 - **S3-Compatible Storage** - Armazenamento de arquivos
 - **GitHub OAuth** - Autenticação de usuários
 

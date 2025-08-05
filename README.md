@@ -1,6 +1,6 @@
-# ClipLet 📋
+# cliplet.app 📋
 
-**ClipLet** é uma aplicação web moderna de área de transferência que permite armazenar, organizar e compartilhar diferentes tipos de conteúdo de forma segura e eficiente.
+**cliplet.app** é uma aplicação web moderna de área de transferência que permite armazenar, organizar e compartilhar diferentes tipos de conteúdo de forma segura e eficiente.
 
 ## ✨ Características
 
@@ -91,7 +91,7 @@ S3_PUBLIC_URL=https://seu-bucket.s3.amazonaws.com
 1. Acesse [GitHub Developer Settings](https://github.com/settings/developers)
 2. Crie uma nova OAuth App
 3. Configure:
-   - **Application name**: ClipLet
+   - **Application name**: cliplet.app
    - **Homepage URL**: `http://localhost:3000`
    - **Authorization callback URL**: `http://localhost:3000/auth/github/callback`
 4. Copie o Client ID e Client Secret para o `.env.local`

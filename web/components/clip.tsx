@@ -67,6 +67,32 @@ async function fetchClip(clipId: string): Promise<TextClip | ImageClip | VideoCl
   return await response.json();
 }
 
+async function downloadFile(url: string, filename: string) {
+  try {
+    const response = await fetch(url, {
+      credentials: "omit",
+      headers: {}
+    });
+    const blob = await response.blob();
+
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+
+    toast.success("Download iniciado!");
+  } catch (err) {
+    console.error("Falha ao fazer download:", err);
+    toast.error("Não foi possível fazer o download do arquivo.");
+  }
+}
+
 export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
   const isMobile = useIsMobile();
 
@@ -274,7 +300,7 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
               </Button>
             )}
             {clip.type !== "text" && (
-              <Button onClick={handleCopyAndClose} className="w-full" size="lg">
+              <Button onClick={(e) => downloadFile(clip.content, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
                 <DownloadIcon className="h-4 w-4 mr-2" />
                 Baixar {getClipTypeDisplayName().toLowerCase()}
               </Button>
@@ -308,7 +334,7 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
             </Button>
           )}
           {clip.type !== "text" && (
-            <Button onClick={handleCopyAndClose} className="w-full" size="lg">
+            <Button onClick={(e) => downloadFile(clip.content, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
               <DownloadIcon className="h-4 w-4 mr-2" />
               Baixar {getClipTypeDisplayName().toLowerCase()}
             </Button>

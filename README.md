@@ -1,4 +1,4 @@
-# cliplet.app 📋
+# 📋cliplet.app
 
 **cliplet.app** é uma aplicação web moderna de área de transferência que permite armazenar, organizar e compartilhar diferentes tipos de conteúdo de forma segura e eficiente.
 
@@ -196,11 +196,6 @@ web/
 ## 📝 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-## 🔧 Problemas Conhecidos
-
-- Upload de arquivos muito grandes pode ser lento
-- Alguns tipos de arquivo podem não ter preview
 
 ---
 

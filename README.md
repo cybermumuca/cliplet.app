@@ -193,24 +193,6 @@ web/
 - Limitação de tamanho de arquivos (10MB)
 - Headers de segurança configurados
 
-## 🚀 Deploy
-
-### Vercel (Recomendado)
-
-1. Conecte o repositório na Vercel
-2. Configure as variáveis de ambiente
-3. Deploy automático a cada push
-
-### Docker
-
-```bash
-# Build da imagem
-docker build -t cliplet-app .
-
-# Execute o container
-docker run -p 3000:3000 --env-file .env cliplet-app
-```
-
 ## 🤝 Contribuindo
 
 1. Faça um fork do projeto
@@ -218,14 +200,6 @@ docker run -p 3000:3000 --env-file .env cliplet-app
 3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
 4. Push para a branch (`git push origin feature/nova-feature`)
 5. Abra um Pull Request
-
-### Convenções de Código
-
-- Use TypeScript em todos os arquivos
-- Siga o padrão de nomenclatura kebab-case para arquivos
-- Use componentes funcionais com hooks
-- Mantenha componentes pequenos e focados
-- Adicione tipos apropriados
 
 ## 📝 Licença
 
@@ -235,16 +209,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 - Upload de arquivos muito grandes pode ser lento
 - Alguns tipos de arquivo podem não ter preview
-
-## 🗺️ Roadmap
-
-- [ ] Suporte a mais provedores OAuth (Google, Microsoft)
-- [ ] Compartilhamento de clips via link
-- [ ] Organização em pastas/tags
-- [ ] API pública para desenvolvedores
-- [ ] Aplicativo mobile
-- [ ] Sync entre dispositivos
-- [ ] Histórico de versões para clips de texto
 
 ---
 

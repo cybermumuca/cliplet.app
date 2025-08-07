@@ -281,6 +281,13 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
   function ClipContent() {
     if (!clip) return null;
 
+    function formatDuration(duration: number): string {
+      if (isNaN(duration) || duration < 0) return "—";
+      const minutes = Math.floor(duration / 60);
+      const seconds = Math.floor(duration % 60);
+      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    }
+
     return (
       <div className="space-y-6">
         {renderDetailedContent()}
@@ -290,6 +297,31 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
             <span>Tipo:</span>
             <span>{getClipTypeDisplayName()}</span>
           </div>
+          {clip.type !== 'text' && 'metadata' in clip && 'mimeType' in clip.metadata && clip.metadata.mimeType !== null && (
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>Tipo de arquivo:</span>
+              <span>{clip.metadata.mimeType}</span>
+            </div>
+          )}
+          {clip.type !== 'text' && 'metadata' in clip && clip.metadata.size && (
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>Tamanho:</span>
+              <span>{(clip.metadata.size / 1024 / 1024).toFixed(2)} MB</span>
+            </div>
+          )}
+          {(clip.type === "image" || clip.type === "video") && 'metadata' in clip && 'width' in clip.metadata && 'height' in clip.metadata && (
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>Dimensões:</span>
+              <span>{clip.metadata.width} × {clip.metadata.height}</span>
+            </div>
+          )}
+          {(clip.type === "audio" || clip.type === "video") && 'metadata' in clip && 'duration' in clip.metadata && (
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>Duração:</span>
+              <span>{formatDuration(clip.metadata.duration)}</span>
+            </div>
+          )}
+
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>Criado:</span>
             <span>
@@ -303,12 +335,6 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
               })}
             </span>
           </div>
-          {clip.type !== 'text' && 'metadata' in clip && clip.metadata.size && (
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Tamanho:</span>
-              <span>{(clip.metadata.size / 1024 / 1024).toFixed(2)} MB</span>
-            </div>
-          )}
         </div>
       </div>
     )
@@ -319,14 +345,18 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
         <DrawerContent className="min-h-[90vh]">
           <DrawerHeader>
-            <DrawerTitle>
-              {isLoading ? <ClipHeaderSkeleton /> : getClipDisplayName()}
-            </DrawerTitle>
-            <DrawerDescription>
-              {isLoading ? null : clip ? (
-                `Criado ${formatTimestamp(clip.createdAt)}`
-              ) : null}
-            </DrawerDescription>
+            {isLoading ? (
+              <ClipHeaderSkeleton isMobile />
+            ) : (
+              <>
+                <DrawerTitle>
+                  {getClipDisplayName()}
+                </DrawerTitle>
+                <DrawerDescription>
+                  {getClipTypeDisplayName()}
+                </DrawerDescription>
+              </>
+            )}
           </DrawerHeader>
           <div className="px-4 overflow-y-scroll">
             {isLoading ? (
@@ -393,14 +423,18 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>
-            {isLoading ? <ClipHeaderSkeleton /> : getClipDisplayName()}
-          </SheetTitle>
-          <SheetDescription>
-            {isLoading ? null : clip ? (
-              `Criado ${formatTimestamp(clip.createdAt)}`
-            ) : null}
-          </SheetDescription>
+          {isLoading ? (
+            <ClipHeaderSkeleton />
+          ) : (
+            <>
+              <SheetTitle>
+                {getClipDisplayName()}
+              </SheetTitle>
+              <SheetDescription>
+                {getClipTypeDisplayName()}
+              </SheetDescription>
+            </>
+          )}
         </SheetHeader>
         <div className="px-4">
           {isLoading ? (

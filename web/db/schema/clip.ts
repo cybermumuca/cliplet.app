@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { foreignKey, pgEnum, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
+import { foreignKey, index, pgEnum, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
 import { users } from "./user";
 import { relations } from "drizzle-orm";
 
@@ -27,12 +27,14 @@ export const clips = pgTable(
   },
   (table) => [
     primaryKey({ name: "clips_pk_id", columns: [table.id] }),
+
+    index("clips_idx_fk_user").on(table.userId),
     foreignKey({
       name: "clips_fk_user",
       columns: [table.userId],
       foreignColumns: [users.id],
     })
-      .onDelete("cascade")
+      .onDelete("set null")
       .onUpdate("no action"),
   ],
 );

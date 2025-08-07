@@ -115,8 +115,7 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
   const { data: clip, isLoading, error } = useQuery({
     queryKey: ['clip', clipId],
     queryFn: () => fetchClip(clipId),
-    refetchOnWindowFocus: true,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: Infinity,
     enabled: isOpen,
   })
 

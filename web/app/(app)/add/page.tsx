@@ -15,6 +15,7 @@ import { useTextSave } from "@/hooks/use-text-save";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { FileUploadArea } from "@/components/file-upload-area";
 import { TypeSelector } from "@/components/type-selector";
+import { queryClient } from "@/lib/react-query";
 
 type ClipType = "text" | "file";
 
@@ -62,6 +63,8 @@ export default function Add() {
     } else if (type === "file" && file) {
       await uploadFile({ file, detectClipType });
     }
+
+    await queryClient.refetchQueries({ queryKey: ['clips'] });
 
     router.push("/");
   }

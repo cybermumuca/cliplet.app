@@ -1,4 +1,4 @@
-import { FileIcon, FileTextIcon, ImageIcon, CopyIcon, DownloadIcon, ClipboardIcon, ClapperboardIcon, HeadphonesIcon } from "lucide-react";
+import { FileIcon, FileTextIcon, ImageIcon, CopyIcon, DownloadIcon, ClipboardIcon, ClapperboardIcon, HeadphonesIcon, TrashIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -19,10 +19,22 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { ClipTypes, Clip, FileClip, TextClip, DocumentClip, AudioClip, VideoClip, ImageClip } from "@/types/clip";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatTimestamp } from "@/lib/utils";
+import { useState } from "react";
 
 interface ClipProps {
   clipId: string;
@@ -95,6 +107,8 @@ async function downloadFile(url: string, filename: string) {
 
 export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: clip, isLoading, error } = useQuery({
     queryKey: ['clip', clipId],
@@ -228,6 +242,33 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
     onOpenChange(false);
   }
 
+  async function handleDeleteClip() {
+    if (!clip) return;
+
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/clips/${clip.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete clip');
+      }
+
+      // Invalidate queries to refresh the clips list
+      queryClient.refetchQueries({ queryKey: ['clips'] });
+
+      toast.success("Clip deletado com sucesso!");
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error deleting clip:", error);
+      toast.error("Não foi possível deletar o clip.");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   function getClipDisplayName(): string {
     if (clip!.type === 'text') return 'Texto';
     return clip!.metadata.fileName;
@@ -305,6 +346,30 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
                 Baixar {getClipTypeDisplayName().toLowerCase()}
               </Button>
             )}
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="lg" className="w-full" disabled={isDeleting}>
+                  <TrashIcon className="h-4 w-4 mr-2" />
+                  {isDeleting ? "Deletando..." : "Deletar clip"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Deletar clip</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tem certeza de que deseja deletar este clip? Esta ação não pode ser desfeita.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteClip} disabled={isDeleting}>
+                    {isDeleting ? "Deletando..." : "Deletar"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
             <DrawerClose asChild>
               <Button variant="outline" size="lg">Fechar</Button>
             </DrawerClose>
@@ -339,6 +404,30 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
               Baixar {getClipTypeDisplayName().toLowerCase()}
             </Button>
           )}
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="w-full" disabled={isDeleting}>
+                <TrashIcon className="h-4 w-4 mr-2" />
+                {isDeleting ? "Deletando..." : "Deletar clip"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Deletar clip</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Tem certeza de que deseja deletar este clip? Esta ação não pode ser desfeita.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteClip} disabled={isDeleting}>
+                  {isDeleting ? "Deletando..." : "Deletar"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           <SheetClose asChild>
             <Button variant="outline">Fechar</Button>
           </SheetClose>

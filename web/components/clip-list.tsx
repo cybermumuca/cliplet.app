@@ -3,6 +3,7 @@
 import { CopyIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ClipPreview } from "./clip-preview";
+import { ClipListSkeleton } from "./clip-list-skeleton";
 import { useRouter } from "next/navigation";
 import { useFilterStore } from "@/store/filter-store";
 import { useSortStore } from "@/store/sort-store";
@@ -32,11 +33,11 @@ export function ClipList() {
     queryKey: ['clips', currentFilter, currentSort],
     queryFn: () => fetchClips(currentFilter, currentSort),
     refetchOnWindowFocus: true,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 2, // 2 minutos
   })
 
   if (isLoading) {
-    return <LoadingPlaceholder />;
+    return <ClipListSkeleton />;
   }
 
   if (error) {
@@ -50,15 +51,6 @@ export function ClipList() {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
       {clips.map((clip) => <ClipPreview key={clip.id} clip={clip} />)}
-    </div>
-  );
-}
-
-function LoadingPlaceholder() {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-      <p className="text-muted-foreground">Carregando clips...</p>
     </div>
   );
 }

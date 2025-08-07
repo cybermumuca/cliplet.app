@@ -35,6 +35,8 @@ import type { ClipTypes, Clip, FileClip, TextClip, DocumentClip, AudioClip, Vide
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatTimestamp } from "@/lib/utils";
 import { useState } from "react";
+import { ClipSkeleton, ClipButtonsSkeleton, ClipHeaderSkeleton } from "./clip-skeleton";
+import { ClipError } from "./clip-error";
 
 interface ClipProps {
   clipId: string;
@@ -115,42 +117,21 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
     queryFn: () => fetchClip(clipId),
     refetchOnWindowFocus: true,
     staleTime: 1000 * 60 * 5, // 5 minutos
+    enabled: isOpen,
   })
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-red-500">Erro ao carregar clip</p>
-      </div>
-    );
-  }
-
-  if (!clip) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-muted-foreground">Clip não encontrado</p>
-      </div>
-    );
-  }
-
   function renderDetailedContent() {
-    switch (clip!.type) {
+    if (!clip) return null;
+
+    switch (clip.type) {
       case 'text':
         return (
           <div className="space-y-4">
             <div className="p-4 bg-muted rounded-lg">
               <p className="text-sm whitespace-pre-wrap break-words">
-                {clip!.content.length > 300
-                  ? clip!.content.slice(0, 300) + "…"
-                  : clip!.content}
+                {clip.content.length > 300
+                  ? clip.content.slice(0, 300) + "…"
+                  : clip.content}
               </p>
             </div>
           </div>
@@ -160,22 +141,22 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
           <div className="space-y-4">
             <div className={`aspect-square bg-muted rounded-lg overflow-hidden ${isMobile && "h-64 w-full"}`}>
               <img
-                src={clip!.content}
-                alt={clip!.metadata.fileName || "Imagem"}
+                src={clip.content}
+                alt={'metadata' in clip ? clip.metadata.fileName || "Imagem" : "Imagem"}
                 className="w-full h-full object-contain"
                 onError={(e) => {
                   e.currentTarget.parentElement!.innerHTML = `
                     <div class="flex items-center justify-center h-full text-muted-foreground">
                       <svg class="h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                  </div>
-                `;
+                      </svg>
+                    </div>
+                  `;
                 }}
               />
             </div>
             <p className="text-sm text-muted-foreground text-center">
-              {clip!.metadata.fileName}
+              {'metadata' in clip ? clip.metadata.fileName : 'Imagem'}
             </p>
           </div>
         );
@@ -184,13 +165,13 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
           <div className="space-y-4">
             <div className={`aspect-video bg-muted rounded-lg overflow-hidden ${isMobile && "h-64 w-full"}`}>
               <video
-                src={clip!.content}
+                src={clip.content}
                 controls
                 className="w-full h-full object-contain"
               />
             </div>
             <p className="text-sm text-muted-foreground text-center">
-              {clip!.metadata.fileName}
+              {'metadata' in clip ? clip.metadata.fileName : 'Vídeo'}
             </p>
           </div>
         );
@@ -199,15 +180,19 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
           <div className="space-y-4 text-center">
             <div className="flex justify-center">
               <div className="p-6 bg-muted rounded-md">
-                {getClipIcon(clip!.type)}
+                {getClipIcon(clip.type)}
               </div>
             </div>
-            <audio src={clip!.content} controls className="w-full" />
+            <audio src={clip.content} controls className="w-full" />
             <div>
-              <p className="font-medium">{clip!.metadata.fileName}</p>
-              <p className="text-sm text-muted-foreground">
-                Duração: {Math.round(clip!.metadata.duration)}s
+              <p className="font-medium">
+                {'metadata' in clip ? clip.metadata.fileName : 'Áudio'}
               </p>
+              {'metadata' in clip && 'duration' in clip.metadata && (
+                <p className="text-sm text-muted-foreground">
+                  Duração: {Math.round(clip.metadata.duration)}s
+                </p>
+              )}
             </div>
           </div>
         );
@@ -217,14 +202,18 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
           <div className="space-y-4 text-center">
             <div className="flex justify-center">
               <div className="p-6 bg-muted rounded-md">
-                {getClipIcon(clip!.type)}
+                {getClipIcon(clip.type)}
               </div>
             </div>
             <div>
-              <p className="font-medium">{clip!.metadata.fileName}</p>
-              <p className="text-sm text-muted-foreground">
-                {clip!.type === 'document' ? 'Documento' : 'Arquivo'} • {(clip!.metadata.size / 1024 / 1024).toFixed(2)} MB
+              <p className="font-medium">
+                {'metadata' in clip ? clip.metadata.fileName : 'Arquivo'}
               </p>
+              {'metadata' in clip && 'size' in clip.metadata && (
+                <p className="text-sm text-muted-foreground">
+                  {clip.type === 'document' ? 'Documento' : 'Arquivo'} • {(clip.metadata.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              )}
             </div>
           </div>
         );
@@ -238,7 +227,8 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
   }
 
   function handleCopyAndClose() {
-    copyToClipboard(clip!.content);
+    if (!clip) return;
+    copyToClipboard(clip.content);
     onOpenChange(false);
   }
 
@@ -270,11 +260,13 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
   }
 
   function getClipDisplayName(): string {
-    if (clip!.type === 'text') return 'Texto';
-    return clip!.metadata.fileName;
+    if (!clip) return 'Clip não encontrado';
+    if (clip.type === 'text') return 'Texto';
+    return 'metadata' in clip ? clip.metadata.fileName : 'Arquivo';
   }
 
   function getClipTypeDisplayName(): string {
+    if (!clip) return '';
     const typeMap = {
       text: 'Texto',
       image: 'Imagem',
@@ -283,10 +275,12 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
       document: 'Documento',
       file: 'Arquivo'
     };
-    return typeMap[clip!.type];
+    return typeMap[clip.type];
   }
 
   function ClipContent() {
+    if (!clip) return null;
+
     return (
       <div className="space-y-6">
         {renderDetailedContent()}
@@ -299,7 +293,7 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>Criado:</span>
             <span>
-              {new Date(clip!.createdAt).toLocaleString("pt-BR", {
+              {new Date(clip.createdAt).toLocaleString("pt-BR", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric",
@@ -309,10 +303,10 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
               })}
             </span>
           </div>
-          {clip!.type !== 'text' && clip!.metadata.size && (
+          {clip.type !== 'text' && 'metadata' in clip && clip.metadata.size && (
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span>Tamanho:</span>
-              <span>{(clip!.metadata.size / 1024 / 1024).toFixed(2)} MB</span>
+              <span>{(clip.metadata.size / 1024 / 1024).toFixed(2)} MB</span>
             </div>
           )}
         </div>
@@ -323,56 +317,72 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
-        <DrawerContent>
+        <DrawerContent className="min-h-[90vh]">
           <DrawerHeader>
-            <DrawerTitle>{getClipDisplayName()}</DrawerTitle>
+            <DrawerTitle>
+              {isLoading ? <ClipHeaderSkeleton /> : getClipDisplayName()}
+            </DrawerTitle>
             <DrawerDescription>
-              Criado {formatTimestamp(clip.createdAt)}
+              {isLoading ? null : clip ? (
+                `Criado ${formatTimestamp(clip.createdAt)}`
+              ) : null}
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4 overflow-y-scroll">
-            <ClipContent />
+            {isLoading ? (
+              <ClipSkeleton isMobile={isMobile} />
+            ) : error ? (
+              <ClipError clipId={clipId} />
+            ) : clip ? (
+              <ClipContent />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-muted-foreground">Clip não encontrado</p>
+              </div>
+            )}
           </div>
-          <DrawerFooter className="space-y-0.5 mt-2">
-            {clip.type === "text" && (
-              <Button onClick={handleCopyAndClose} className="w-full" size="lg">
-                <CopyIcon className="h-4 w-4 mr-2" />
-                Copiar conteúdo
-              </Button>
-            )}
-            {clip.type !== "text" && (
-              <Button onClick={(e) => downloadFile(clip.content, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
-                <DownloadIcon className="h-4 w-4 mr-2" />
-                Baixar {getClipTypeDisplayName().toLowerCase()}
-              </Button>
-            )}
+          <DrawerFooter className="space-y-0.5">
+            {isLoading ? (
+              <ClipButtonsSkeleton />
+            ) : clip && !error ? (
+              <>
+                {clip.type === "text" && (
+                  <Button onClick={handleCopyAndClose} className="w-full" size="lg">
+                    <CopyIcon className="h-4 w-4 mr-2" />
+                    Copiar conteúdo
+                  </Button>
+                )}
+                {clip.type !== "text" && 'metadata' in clip && (
+                  <Button onClick={(e) => downloadFile(clip.content, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
+                    <DownloadIcon className="h-4 w-4 mr-2" />
+                    Baixar {getClipTypeDisplayName().toLowerCase()}
+                  </Button>
+                )}
 
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="lg" className="w-full" disabled={isDeleting}>
-                  <TrashIcon className="h-4 w-4 mr-2" />
-                  {isDeleting ? "Deletando..." : "Deletar clip"}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Deletar clip</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tem certeza de que deseja deletar este clip? Esta ação não pode ser desfeita.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteClip} disabled={isDeleting}>
-                    {isDeleting ? "Deletando..." : "Deletar"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-
-            <DrawerClose asChild>
-              <Button variant="outline" size="lg">Fechar</Button>
-            </DrawerClose>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="lg" className="w-full" disabled={isDeleting}>
+                      <TrashIcon className="h-4 w-4 mr-2" />
+                      {isDeleting ? "Deletando..." : "Deletar clip"}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Deletar clip</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza de que deseja deletar este clip? Esta ação não pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteClip} disabled={isDeleting}>
+                        {isDeleting ? "Deletando..." : "Deletar"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            ) : null}
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
@@ -383,54 +393,70 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>{getClipDisplayName()}</SheetTitle>
+          <SheetTitle>
+            {isLoading ? <ClipHeaderSkeleton /> : getClipDisplayName()}
+          </SheetTitle>
           <SheetDescription>
-            Criado {formatTimestamp(clip.createdAt)}
+            {isLoading ? null : clip ? (
+              `Criado ${formatTimestamp(clip.createdAt)}`
+            ) : null}
           </SheetDescription>
         </SheetHeader>
         <div className="px-4">
-          <ClipContent />
+          {isLoading ? (
+            <ClipSkeleton isMobile={isMobile} />
+          ) : error ? (
+            <ClipError clipId={clipId} />
+          ) : clip ? (
+            <ClipContent />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-muted-foreground">Clip não encontrado</p>
+            </div>
+          )}
         </div>
         <SheetFooter className="px-4 space-y-0.5">
-          {clip.type === "text" && (
-            <Button onClick={handleCopyAndClose} className="w-full" size="lg">
-              <CopyIcon className="h-4 w-4 mr-2" />
-              Copiar conteúdo
-            </Button>
-          )}
-          {clip.type !== "text" && (
-            <Button onClick={(e) => downloadFile(clip.content, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
-              <DownloadIcon className="h-4 w-4 mr-2" />
-              Baixar {getClipTypeDisplayName().toLowerCase()}
-            </Button>
-          )}
+          {isLoading ? (
+            <ClipButtonsSkeleton />
+          ) : clip && !error ? (
+            <>
+              {clip.type === "text" && (
+                <Button onClick={handleCopyAndClose} className="w-full" size="lg">
+                  <CopyIcon className="h-4 w-4 mr-2" />
+                  Copiar conteúdo
+                </Button>
+              )}
+              {clip.type !== "text" && 'metadata' in clip && (
+                <Button onClick={(e) => downloadFile(clip.content, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
+                  <DownloadIcon className="h-4 w-4 mr-2" />
+                  Baixar {getClipTypeDisplayName().toLowerCase()}
+                </Button>
+              )}
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="w-full" disabled={isDeleting}>
-                <TrashIcon className="h-4 w-4 mr-2" />
-                {isDeleting ? "Deletando..." : "Deletar clip"}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Deletar clip</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Tem certeza de que deseja deletar este clip? Esta ação não pode ser desfeita.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteClip} disabled={isDeleting}>
-                  {isDeleting ? "Deletando..." : "Deletar"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          <SheetClose asChild>
-            <Button variant="outline">Fechar</Button>
-          </SheetClose>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="w-full" disabled={isDeleting}>
+                    <TrashIcon className="h-4 w-4 mr-2" />
+                    {isDeleting ? "Deletando..." : "Deletar clip"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Deletar clip</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tem certeza de que deseja deletar este clip? Esta ação não pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteClip} disabled={isDeleting}>
+                      {isDeleting ? "Deletando..." : "Deletar"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
+          ) : null}
         </SheetFooter>
       </SheetContent>
     </Sheet>

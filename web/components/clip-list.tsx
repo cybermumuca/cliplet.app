@@ -85,12 +85,12 @@ function NoDataPlaceholder() {
       <div className="rounded-full bg-muted p-6 mb-4">
         <CopyIcon className="h-8 w-8 text-muted-foreground" />
       </div>
-      <h3 className="text-lg font-medium mb-2">Nenhum item ainda</h3>
+      <h3 className="text-lg font-medium mb-2">Nenhum clip ainda</h3>
       <p className="text-muted-foreground mb-6 max-w-md">
         Comece adicionando textos, arquivos ou imagens para compartilhar entre seus dispositivos.
       </p>
       <Button onClick={() => router.push("/add")} className="w-full sm:w-auto">
-        Adicionar item
+        Adicionar clip
       </Button>
     </div>
   );

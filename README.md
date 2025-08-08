@@ -1,6 +1,6 @@
-# 📋cliplet.app
+# cliplet.app
 
-**cliplet.app** é uma aplicação web moderna de área de transferência que permite armazenar, organizar e compartilhar diferentes tipos de conteúdo de forma segura e eficiente.
+**cliplet.app** é uma aplicação web moderna de área de transferência que permite armazenar, organizar e compartilhar diferentes tipos de conteúdo entre dispositivos de forma segura e eficiente.
 
 ## ✨ Funcionalidades
 
@@ -15,21 +15,21 @@
 - 🔒 **Autenticação segura**: Login via GitHub OAuth
 - ⚡ **Interface moderna**: Construída com Next.js e React 19
 
-## 🛠️ Stack Tecnológica
+## 🛠️ Stack
 
-- **[Next.js 15](https://nextjs.org/)** - Framework React com App Router
-- **[React 19](https://react.dev/)** - Biblioteca de interface do usuário
+- **[Next.js 15](https://nextjs.org/)** - Framework React
+- **[React 19](https://react.dev/)** - Biblioteca de construção de UI
 - **[TypeScript](https://www.typescriptlang.org/)** - Tipagem estática
-- **[Tailwind CSS](https://tailwindcss.com/)** - Framework de estilização
-- **[Radix UI](https://www.radix-ui.com/)** - Componentes de interface acessíveis
-- **[Lucide React](https://lucide.dev/)** - Ícones modernos
+- **[Tailwind CSS](https://tailwindcss.com/)** - Framework CSS
+- **[shadcn/ui](https://ui.shadcn.com/)** - Componentes reutilizaveis
+- **[Lucide](https://lucide.dev/)** - Ícones modernos
 - **[Zustand](https://zustand-demo.pmnd.rs/)** - Gerenciamento de estado
-- **[TanStack Query](https://tanstack.com/query)** - Gerenciamento de dados e cache
+- **[TanStack Query](https://tanstack.com/query)** - Estado HTTP, gerenciamento de dados e cache
 - **[Drizzle ORM](https://orm.drizzle.team/)** - ORM moderno para TypeScript
 - **[PostgreSQL](https://www.postgresql.org/)** - Banco de dados relacional
-- **[JWT](https://jwt.io/)** - Autenticação baseada em tokens
+- **[JWT](https://jwt.io/)** - Autenticação baseada em JWT
 - **[Zod](https://zod.dev/)** - Validação de schemas
-- **[S3-Compatible Storage](https://aws.amazon.com/s3/)** - Armazenamento de arquivos
+- **[S3](https://www.cloudflare.com/pt-br/developer-platform/products/r2/)** - Armazenamento de arquivos
 - **[GitHub OAuth](https://docs.github.com/en/developers/apps/building-oauth-apps)** - Autenticação de usuários
 
 ## 🚀 Instalação e Configuração
@@ -115,7 +115,6 @@ pnpm dev
 A aplicação estará disponível em [http://localhost:3000](http://localhost:3000).
 
 ## 📊 Banco de Dados
-
 
 ### Comandos úteis do banco
 

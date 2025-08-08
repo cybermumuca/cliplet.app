@@ -2,6 +2,7 @@
 
 import { LogOut, Settings, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -27,10 +28,16 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export function SettingsButton() {
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
+  const router = useRouter();
 
   function handleClearAll() { }
 
-  function handleLogout() { }
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.replace("/auth/sign-in");
+    } catch (e) {}
+  }
 
   function SettingsContent() {
     return (
@@ -57,7 +64,7 @@ export function SettingsButton() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleClearAll} >
+                  <AlertDialogAction onClick={handleClearAll}>
                     Sim, limpar tudo
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -74,7 +81,7 @@ export function SettingsButton() {
             onClick={handleLogout}
           >
             <LogOut className="h-4 w-4 mr-2 text-red-500" />
-            Sair da aplicação
+            Fazer logout
           </Button>
         </div>
       </div>

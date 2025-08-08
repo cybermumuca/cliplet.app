@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST() {
   // Remove o cookie de autenticação
-  await (await cookies()).set({
+  (await cookies()).set({
     name: "auth_token",
     value: "",
     path: "/",

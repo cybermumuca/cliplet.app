@@ -35,14 +35,12 @@ async function copyToClipboard(content: string) {
   }
 }
 
-async function downloadFile(url: string, filename: string) {
+async function downloadFile(clipId: string, filename: string) {
   try {
-    const response = await fetch(url, {
-      credentials: "omit",
-      headers: {}
-    });
-    const blob = await response.blob();
+    const response = await fetch(`/api/clips/${clipId}/download`);
+    if (!response.ok) throw new Error("Erro ao baixar arquivo");
 
+    const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
@@ -163,7 +161,7 @@ export function ClipPreview({ clip }: ClipPreviewProps) {
                   return;
                 }
 
-                downloadFile(clip.content, clip.fileName || 'arquivo');
+                downloadFile(clip.id, clip.fileName || 'arquivo');
               }}
             >
               {clip.type === "text" ? <CopyIcon className="h-4 w-4" /> : <DownloadIcon className="h-4 w-4" />}

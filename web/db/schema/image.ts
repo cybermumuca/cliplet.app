@@ -7,12 +7,10 @@ export const images = pgTable(
     id: text("id")
       .notNull()
       .references(() => clips.id),
-    fileName: varchar("file_name").notNull(),
     fileKey: varchar("file_key").notNull(),
     fileSize: integer("file_size").notNull(),
     mimeType: varchar("mime_type").notNull(),
     originalName: varchar("original_name").notNull(),
-    url: text("url").notNull(),
     width: integer("width"),
     height: integer("height"),
   },

@@ -62,7 +62,6 @@ async function getURLUpload(file: File) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        originalFileName: file.name,
         originalFileSize: file.size,
         originalMimeType: file.type
       })
@@ -74,9 +73,9 @@ async function getURLUpload(file: File) {
         message: 'Erro ao gerar URL de upload'
       })
     }
-    const { uploadUrl, fileKey } = await uploadResponse.json();
+    const { uploadUrl, fileKey, uniqueFileName } = await uploadResponse.json();
 
-    return Right.create({ uploadUrl, fileKey });
+    return Right.create({ uploadUrl, fileKey, uniqueFileName });
   } catch {
     return Left.create({
       code: 'UPLOAD_URL_EXCEPTION',
@@ -145,7 +144,6 @@ async function uploadFile({ file, detectClipType }: UploadFileParams) {
   const clipData = {
     type: clipType,
     fileKey,
-    fileName: file.name,
     fileSize: file.size,
     mimeType: file.type ?? undefined,
     originalFileName: file.name,

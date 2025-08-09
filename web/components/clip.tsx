@@ -81,14 +81,12 @@ async function fetchClip(clipId: string): Promise<TextClip | ImageClip | VideoCl
   return await response.json();
 }
 
-async function downloadFile(url: string, filename: string) {
+async function downloadFile(clipId: string, filename: string) {
   try {
-    const response = await fetch(url, {
-      credentials: "omit",
-      headers: {}
-    });
-    const blob = await response.blob();
+    const response = await fetch(`/api/clips/${clipId}/download`);
+    if (!response.ok) throw new Error("Erro ao baixar arquivo");
 
+    const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
@@ -115,7 +113,8 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
   const { data: clip, isLoading, error } = useQuery({
     queryKey: ['clip', clipId],
     queryFn: () => fetchClip(clipId),
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60, // 1 hora
+    refetchInterval: 1000 * 60 * 40, // 40 minutos
     enabled: isOpen,
   })
 
@@ -382,7 +381,7 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
                   </Button>
                 )}
                 {clip.type !== "text" && 'metadata' in clip && (
-                  <Button onClick={(e) => downloadFile(clip.content, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
+                  <Button onClick={(e) => downloadFile(clip.id, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
                     <DownloadIcon className="h-4 w-4 mr-2" />
                     Baixar {getClipTypeDisplayName().toLowerCase()}
                   </Button>
@@ -460,7 +459,7 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
                 </Button>
               )}
               {clip.type !== "text" && 'metadata' in clip && (
-                <Button onClick={(e) => downloadFile(clip.content, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
+                <Button onClick={(e) => downloadFile(clip.id, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
                   <DownloadIcon className="h-4 w-4 mr-2" />
                   Baixar {getClipTypeDisplayName().toLowerCase()}
                 </Button>

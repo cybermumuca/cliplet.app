@@ -3,9 +3,10 @@ import { audios, clips, documents, files, images, texts, videos } from "@/db/sch
 import { withAuth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "@/lib/s3";
 import { env } from "@/lib/env";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export const GET = withAuth(async (request: NextRequest, { params }: { params: Promise<{ id: string }> }, userId: string) => {
   const { id } = await params;
@@ -16,25 +17,25 @@ export const GET = withAuth(async (request: NextRequest, { params }: { params: P
     createdAt: clips.createdAt,
 
     // Audio data
-    audioUrl: audios.url,
+    audioKey: audios.fileKey,
     audioSize: audios.fileSize,
     audioMimeType: audios.mimeType,
     audioFileName: audios.originalName,
     audioDuration: audios.duration,
 
     // Document data
-    documentUrl: documents.url,
+    documentKey: documents.fileKey,
     documentSize: documents.fileSize,
     documentMimeType: documents.mimeType,
     documentFileName: documents.originalName,
 
     // File data
-    fileUrl: files.url,
+    fileKey: files.fileKey,
     fileSize: files.fileSize,
     fileFileName: files.originalName,
 
     // Image data
-    imageUrl: images.url,
+    imageKey: images.fileKey,
     imageSize: images.fileSize,
     imageMimeType: images.mimeType,
     imageFileName: images.originalName,
@@ -45,7 +46,7 @@ export const GET = withAuth(async (request: NextRequest, { params }: { params: P
     textContent: texts.content,
 
     // Video data
-    videoUrl: videos.url,
+    videoKey: videos.fileKey,
     videoSize: videos.fileSize,
     videoMimeType: videos.mimeType,
     videoFileName: videos.originalName,
@@ -78,10 +79,20 @@ export const GET = withAuth(async (request: NextRequest, { params }: { params: P
     });
   }
 
+  const originalFileName = clip.audioFileName || clip.documentFileName || clip.fileFileName || clip.imageFileName || clip.videoFileName;
+
+  const getCommand = new GetObjectCommand({
+    Bucket: env.S3_BUCKET_NAME,
+    Key: clip.audioKey || clip.documentKey || clip.fileKey || clip.imageKey || clip.videoKey!,
+    ResponseContentDisposition: 'attachment; filename=' + encodeURIComponent(originalFileName!),
+  })
+
+  const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+
   const clipTransformed = {
     id: clip.id,
     type: clip.type,
-    content: clip.imageUrl || clip.videoUrl || clip.audioUrl || clip.documentUrl || clip.fileUrl,
+    content: url,
     createdAt: clip.createdAt,
     metadata: {
       size: clip.imageSize || clip.videoSize || clip.audioSize || clip.documentSize || clip.fileSize,

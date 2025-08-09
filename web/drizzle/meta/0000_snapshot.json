@@ -1,5 +1,5 @@
 {
-  "id": "68f1cedb-9c95-4c3e-a50e-649815733a66",
+  "id": "d0234aac-32f2-41c9-8315-7be7f56d8217",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -208,12 +208,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -257,7 +251,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -284,12 +278,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "file_name": {
-          "name": "file_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
         "file_key": {
           "name": "file_key",
           "type": "varchar",
@@ -311,12 +299,6 @@
         "original_name": {
           "name": "original_name",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "url": {
-          "name": "url",
-          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -379,12 +361,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "file_name": {
-          "name": "file_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
         "file_key": {
           "name": "file_key",
           "type": "varchar",
@@ -406,12 +382,6 @@
         "original_name": {
           "name": "original_name",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "url": {
-          "name": "url",
-          "type": "text",
           "primaryKey": false,
           "notNull": true
         }
@@ -468,12 +438,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "file_name": {
-          "name": "file_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
         "file_key": {
           "name": "file_key",
           "type": "varchar",
@@ -489,12 +453,6 @@
         "original_name": {
           "name": "original_name",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "url": {
-          "name": "url",
-          "type": "text",
           "primaryKey": false,
           "notNull": true
         }
@@ -551,12 +509,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "file_name": {
-          "name": "file_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
         "file_key": {
           "name": "file_key",
           "type": "varchar",
@@ -578,12 +530,6 @@
         "original_name": {
           "name": "original_name",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "url": {
-          "name": "url",
-          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -711,12 +657,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "file_name": {
-          "name": "file_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
         "file_key": {
           "name": "file_key",
           "type": "varchar",
@@ -738,12 +678,6 @@
         "original_name": {
           "name": "original_name",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "url": {
-          "name": "url",
-          "type": "text",
           "primaryKey": false,
           "notNull": true
         },

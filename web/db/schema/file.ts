@@ -7,11 +7,9 @@ export const files = pgTable(
     id: text("id")
       .notNull()
       .references(() => clips.id),
-    fileName: varchar("file_name").notNull(),
     fileKey: varchar("file_key").notNull(),
     fileSize: integer("file_size").notNull(),
     originalName: varchar("original_name").notNull(),
-    url: text("url").notNull(),
   },
   (table) => [
     primaryKey({ name: "files_pk_id", columns: [table.id] }),

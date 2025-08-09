@@ -1,6 +1,6 @@
 import { db } from "@/db/connection";
 import { audios } from "@/db/schema/audio";
-import { clips, clipTypesEnum } from "@/db/schema/clip";
+import { clips } from "@/db/schema/clip";
 import { documents } from "@/db/schema/document";
 import { files } from "@/db/schema/file";
 import { images } from "@/db/schema/image";
@@ -8,6 +8,9 @@ import { texts } from "@/db/schema/text";
 import { videos } from "@/db/schema/video";
 import { withAuth } from "@/lib/auth";
 import { env } from "@/lib/env";
+import { s3 } from "@/lib/s3";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { and, eq, asc, desc } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -21,16 +24,12 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
         userId
       }).returning();
 
-      const url = `${env.S3_PUBLIC_URL}/${clip.fileKey}`;
-
       const audioClip = {
         id: newClip.id,
-        fileName: clip.fileName,
         fileKey: clip.fileKey,
         fileSize: clip.fileSize,
         mimeType: clip.mimeType,
         originalName: clip.originalFileName,
-        url,
         duration: clip.duration,
       };
 
@@ -39,7 +38,6 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
       return {
         id: newClip.id,
         type: newClip.type,
-        content: url,
         createdAt: newClip.createdAt
       };
     });
@@ -54,16 +52,12 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
         userId
       }).returning();
 
-      const url = `${env.S3_PUBLIC_URL}/${clip.fileKey}`;
-
       const documentClip = {
         id: newClip.id,
-        fileName: clip.fileName,
         fileKey: clip.fileKey,
         fileSize: clip.fileSize,
         mimeType: clip.mimeType,
         originalName: clip.originalFileName,
-        url,
       };
 
       await tx.insert(documents).values(documentClip);
@@ -71,7 +65,6 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
       return {
         id: newClip.id,
         type: newClip.type,
-        content: url,
         createdAt: newClip.createdAt
       };
     });
@@ -86,16 +79,12 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
         userId
       }).returning();
 
-      const url = `${env.S3_PUBLIC_URL}/${clip.fileKey}`;
-
       const fileClip = {
         id: newClip.id,
-        fileName: clip.fileName,
         fileKey: clip.fileKey,
         fileSize: clip.fileSize,
         mimeType: clip.fileType,
         originalName: clip.originalFileName,
-        url,
       };
 
 
@@ -104,7 +93,6 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
       return {
         id: newClip.id,
         type: newClip.type,
-        content: url,
         createdAt: newClip.createdAt
       };
     });
@@ -119,16 +107,12 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
         userId
       }).returning();
 
-      const url = `${env.S3_PUBLIC_URL}/${clip.fileKey}`;
-
       const imageClip = {
         id: newClip.id,
-        fileName: clip.fileName,
         fileKey: clip.fileKey,
         fileSize: clip.fileSize,
         mimeType: clip.mimeType,
         originalName: clip.originalFileName,
-        url,
         width: clip.width,
         height: clip.height,
       };
@@ -138,7 +122,6 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
       return {
         id: newClip.id,
         type: newClip.type,
-        content: url,
         createdAt: newClip.createdAt
       };
     });
@@ -160,7 +143,7 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
 
       await tx.insert(texts).values(textClip);
 
-      return { id: newClip.id, type: newClip.type, content: clip.content, createdAt: newClip.createdAt };
+      return { id: newClip.id, type: newClip.type, createdAt: newClip.createdAt };
     });
 
     return NextResponse.json(newClip, { status: 201 });
@@ -173,16 +156,12 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
         userId
       }).returning();
 
-      const url = `${env.S3_PUBLIC_URL}/${clip.fileKey}`;
-
       const videoClip = {
         id: newClip.id,
-        fileName: clip.fileName,
         fileKey: clip.fileKey,
         fileSize: clip.fileSize,
         mimeType: clip.mimeType,
         originalName: clip.originalFileName,
-        url,
         duration: clip.duration,
       };
 
@@ -191,7 +170,6 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
       return {
         id: newClip.id,
         type: newClip.type,
-        content: url,
         createdAt: newClip.createdAt
       };
     });
@@ -226,23 +204,23 @@ export const GET = withAuth(async (request: NextRequest, userId: string) => {
       textContent: texts.content,
 
       // Image data
-      imageUrl: images.url,
+      imageKey: images.fileKey,
       imageFileName: images.originalName,
 
       // Video data
-      videoUrl: videos.url,
+      videoKey: videos.fileKey,
       videoFileName: videos.originalName,
 
       // Audio data
-      audioUrl: audios.url,
+      audioKey: audios.fileKey,
       audioFileName: audios.originalName,
 
       // Document data
-      documentUrl: documents.url,
+      documentKey: documents.fileKey,
       documentFileName: documents.originalName,
 
       // File data
-      fileUrl: files.url,
+      fileKey: files.fileKey,
       fileFileName: files.originalName
     })
     .from(clips)
@@ -257,7 +235,7 @@ export const GET = withAuth(async (request: NextRequest, userId: string) => {
       sort === "newest" ? desc(clips.createdAt) : asc(clips.createdAt)
     );
 
-  const transformedClips = clipsList.map(clip => {
+  const transformedClips = await Promise.all(clipsList.map(async clip => {
     const baseClip = {
       id: clip.id,
       type: clip.type,
@@ -267,40 +245,85 @@ export const GET = withAuth(async (request: NextRequest, userId: string) => {
     switch (clip.type) {
       case 'text':
         return { ...baseClip, content: clip.textContent, fileName: null };
-      case 'image':
+      case 'image': {
+        const getCommand = new GetObjectCommand({
+          Bucket: env.S3_BUCKET_NAME,
+          Key: clip.imageKey!,
+          ResponseContentDisposition: `inline; filename="${clip.imageFileName}"`,
+        });
+
+        const imageUrl = await getSignedUrl(s3, getCommand, { expiresIn: 1800 }); // 30 min
+
         return {
           ...baseClip,
-          content: clip.imageUrl,
+          content: imageUrl,
           fileName: clip.imageFileName,
         };
-      case 'video':
+      }
+      case 'video': {
+        const getCommand = new GetObjectCommand({
+          Bucket: env.S3_BUCKET_NAME,
+          Key: clip.videoKey!,
+          ResponseContentDisposition: `inline; filename="${clip.videoFileName}"`,
+        });
+
+        const videoUrl = await getSignedUrl(s3, getCommand, { expiresIn: 1800 }); // 30 min
+
         return {
           ...baseClip,
-          content: clip.videoUrl,
+          content: videoUrl,
           fileName: clip.videoFileName,
         };
-      case 'audio':
+      }
+      case 'audio': {
+        const getCommand = new GetObjectCommand({
+          Bucket: env.S3_BUCKET_NAME,
+          Key: clip.audioKey!,
+          ResponseContentDisposition: `inline; filename="${clip.audioFileName}"`,
+        });
+
+        const audioUrl = await getSignedUrl(s3, getCommand, { expiresIn: 1800 }); // 30 min
+
         return {
           ...baseClip,
-          content: clip.audioUrl,
+          content: audioUrl,
           fileName: clip.audioFileName,
         };
-      case 'document':
+      }
+      case 'document': {
+        const getCommand = new GetObjectCommand({
+          Bucket: env.S3_BUCKET_NAME,
+          Key: clip.documentKey!,
+          ResponseContentDisposition: `inline; filename="${clip.documentFileName}"`,
+        });
+
+        const documentUrl = await getSignedUrl(s3, getCommand, { expiresIn: 1800 }); // 30 min
+
         return {
           ...baseClip,
-          content: clip.documentUrl,
+          content: documentUrl,
           fileName: clip.documentFileName
         };
-      case 'file':
+      }
+      case 'file': {
+        const getCommand = new GetObjectCommand({
+          Bucket: env.S3_BUCKET_NAME,
+          Key: clip.fileKey!,
+          ResponseContentDisposition: `inline; filename="${clip.fileFileName}"`,
+        });
+
+        const fileUrl = await getSignedUrl(s3, getCommand, { expiresIn: 1800 }); // 30 min
+
         return {
           ...baseClip,
-          content: clip.fileUrl,
+          content: fileUrl,
           fileName: clip.fileFileName
         };
+      }
       default:
         return baseClip;
     }
-  });
+  }));
 
   return NextResponse.json(transformedClips, { status: 200 });
 });

@@ -7,14 +7,14 @@ import { s3 } from "@/lib/s3";
 import { env } from "@/lib/env";
 
 export const POST = withAuth(async (request: NextRequest, userId: string) => {
-  const { originalFileName, originalFileSize, originalMimeType } = await request.json();
+  const { originalFileSize, originalMimeType } = await request.json();
 
   if (originalFileSize > 10 * 1024 * 1024) { // 10MB
     return NextResponse.json({ error: "Arquivo muito grande" }, { status: 400 });
   }
 
-  const uniqueFileName = `${randomUUID()}-${originalFileName}`;
-  const fileKey = `clips/${userId}/${uniqueFileName}`;
+  const uniqueFileName = `${randomUUID()}`;
+  const fileKey = `${userId}/${uniqueFileName}`;
 
   try {
     const command = new PutObjectCommand({
@@ -28,9 +28,7 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
 
     return NextResponse.json({
       uploadUrl,
-      fileName: uniqueFileName,
       fileKey,
-      publicUrl: `${env.S3_PUBLIC_URL}/${fileKey}`
     }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Erro ao gerar URL" }, { status: 500 });

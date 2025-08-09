@@ -23,7 +23,6 @@ export const clips = pgTable(
       .notNull()
       .references(() => users.id),
     createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at"),
   },
   (table) => [
     primaryKey({ name: "clips_pk_id", columns: [table.id] }),
@@ -34,7 +33,7 @@ export const clips = pgTable(
       columns: [table.userId],
       foreignColumns: [users.id],
     })
-      .onDelete("set null")
+      .onDelete("no action")
       .onUpdate("no action"),
   ],
 );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Upload, X, File, Image, Video, Music, FileText } from "lucide-react";
+import { UploadIcon, XIcon, FileIcon, ImageIcon, VideoIcon, MusicIcon, FileTextIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatFileSize } from "@/lib/utils";
 import { Label } from "./ui/label";
@@ -19,13 +19,13 @@ interface FileUploadAreaProps {
 }
 
 function getFileIcon(mimeType: string) {
-  if (mimeType.startsWith('image/')) return <Image className="w-8 h-8" />;
-  if (mimeType.startsWith('video/')) return <Video className="w-8 h-8" />;
-  if (mimeType.startsWith('audio/')) return <Music className="w-8 h-8" />;
+  if (mimeType.startsWith('image/')) return <ImageIcon className="w-8 h-8" />;
+  if (mimeType.startsWith('video/')) return <VideoIcon className="w-8 h-8" />;
+  if (mimeType.startsWith('audio/')) return <MusicIcon className="w-8 h-8" />;
   if (mimeType.includes('text') || mimeType.includes('pdf') || mimeType.includes('document')) {
-    return <FileText className="w-8 h-8" />;
+    return <FileTextIcon className="w-8 h-8" />;
   }
-  return <File className="w-8 h-8" />;
+  return <FileIcon className="w-8 h-8" />;
 }
 
 function getFileTypeLabel(mimeType: string): string {
@@ -86,7 +86,7 @@ export function FileUploadArea({
             onClick={onFileRemove}
             className="text-muted-foreground hover:text-foreground"
           >
-            <X className="w-4 h-4" />
+            <XIcon className="w-4 h-4" />
           </Button>
         </div>
 
@@ -138,7 +138,7 @@ export function FileUploadArea({
             p-3 rounded-full transition-colors
             ${isDragOver ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}
           `}>
-            <Upload className="w-6 h-6" />
+            <UploadIcon className="w-6 h-6" />
           </div>
 
           <div className="space-y-2">

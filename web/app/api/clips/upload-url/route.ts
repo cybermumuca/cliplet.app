@@ -30,7 +30,7 @@ export const POST = withAuth(async (request: NextRequest, userId: string) => {
       uploadUrl,
       fileKey,
     }, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Erro ao gerar URL" }, { status: 500 });
   }
 });

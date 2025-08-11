@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
   const githubEmailsData = await githubEmailsResponse.json()
 
-  const primaryEmail = githubEmailsData.find((emailObj: any) => emailObj.primary)?.email;
+  const primaryEmail = githubEmailsData.find((emailObj: { primary: boolean }) => emailObj.primary)?.email;
 
   const {
     id: githubId,

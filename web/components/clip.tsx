@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -12,7 +11,6 @@ import {
 } from "@/components/ui/sheet";
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerFooter,
@@ -33,10 +31,10 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { ClipTypes, Clip, FileClip, TextClip, DocumentClip, AudioClip, VideoClip, ImageClip } from "@/types/clip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatTimestamp } from "@/lib/utils";
 import { useState } from "react";
 import { ClipSkeleton, ClipButtonsSkeleton, ClipHeaderSkeleton } from "./clip-skeleton";
 import { ClipError } from "./clip-error";
+import Image from "next/image";
 
 interface ClipProps {
   clipId: string;
@@ -138,7 +136,7 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
         return (
           <div className="space-y-4">
             <div className={`aspect-square bg-muted rounded-lg overflow-hidden ${isMobile && "h-64 w-full"}`}>
-              <img
+              <Image
                 src={clip.content}
                 alt={'metadata' in clip ? clip.metadata.fileName || "Imagem" : "Imagem"}
                 className="w-full h-full object-contain"
@@ -381,7 +379,7 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
                   </Button>
                 )}
                 {clip.type !== "text" && 'metadata' in clip && (
-                  <Button onClick={(e) => downloadFile(clip.id, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
+                  <Button onClick={() => downloadFile(clip.id, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
                     <DownloadIcon className="h-4 w-4 mr-2" />
                     Baixar {getClipTypeDisplayName().toLowerCase()}
                   </Button>
@@ -459,7 +457,7 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
                 </Button>
               )}
               {clip.type !== "text" && 'metadata' in clip && (
-                <Button onClick={(e) => downloadFile(clip.id, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
+                <Button onClick={() => downloadFile(clip.id, clip.metadata.fileName || 'arquivo')} className="w-full" size="lg">
                   <DownloadIcon className="h-4 w-4 mr-2" />
                   Baixar {getClipTypeDisplayName().toLowerCase()}
                 </Button>

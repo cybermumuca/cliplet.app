@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Clip } from "./clip";
 import { formatTimestamp } from "@/lib/utils";
 import { type ClipItem, type ClipTypes } from "@/types/clip";
+import Image from "next/image";
 
 function getClipIcon(type: ClipTypes) {
   switch (type) {
@@ -80,8 +81,8 @@ export function ClipPreview({ clip }: ClipPreviewProps) {
         );
       case 'image':
         return (
-          <div className="relative h-full">
-            <img
+          <div className="relative h-full">  
+            <Image
               src={clip.content}
               alt={clip.fileName || "Imagem"}
               className="w-full h-full object-cover rounded-lg"

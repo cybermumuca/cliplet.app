@@ -28,7 +28,7 @@ async function getCurrentUserId(): Promise<Either<AuthError, string>> {
     try {
       const result = await jwtVerify(authToken.value, secret);
       payload = result.payload;
-    } catch (jwtError) {
+    } catch {
       return Left.create({
         code: "INVALID_TOKEN",
         message: "Token inválido ou expirado"
@@ -45,7 +45,7 @@ async function getCurrentUserId(): Promise<Either<AuthError, string>> {
     }
 
     return Right.create(userId);
-  } catch (error) {
+  } catch {
     return Left.create({
       code: "UNKNOWN_ERROR",
       message: "Erro desconhecido"
@@ -57,10 +57,12 @@ export function withAuth(
   handler: (request: NextRequest, userId: string) => Promise<NextResponse>
 ): (request: NextRequest) => Promise<NextResponse>;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withAuth<T = any>(
   handler: (request: NextRequest, context: { params: Promise<T> }, userId: string) => Promise<NextResponse>
 ): (request: NextRequest, context: { params: Promise<T> }) => Promise<NextResponse>;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withAuth<T = any>(
   handler: ((request: NextRequest, userId: string) => Promise<NextResponse>) |
     ((request: NextRequest, context: { params: Promise<T> }, userId: string) => Promise<NextResponse>)
@@ -78,9 +80,10 @@ export function withAuth<T = any>(
     const userId = getCurrentUserIdResult.value;
 
     if (context.params) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (handler as any)(request, context, userId);
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (handler as any)(request, userId);
   };
 }

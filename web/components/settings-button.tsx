@@ -36,7 +36,7 @@ export function SettingsButton() {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       router.replace("/auth/sign-in");
-    } catch (e) {}
+    } catch {}
   }
 
   function SettingsContent() {

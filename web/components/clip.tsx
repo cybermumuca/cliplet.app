@@ -34,7 +34,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ClipSkeleton, ClipButtonsSkeleton, ClipHeaderSkeleton } from "./clip-skeleton";
 import { ClipError } from "./clip-error";
-import Image from "next/image";
 
 interface ClipProps {
   clipId: string;
@@ -136,7 +135,7 @@ export function Clip({ clipId, isOpen, onOpenChange }: ClipProps) {
         return (
           <div className="space-y-4">
             <div className={`aspect-square bg-muted rounded-lg overflow-hidden ${isMobile && "h-64 w-full"}`}>
-              <Image
+              <img
                 src={clip.content}
                 alt={'metadata' in clip ? clip.metadata.fileName || "Imagem" : "Imagem"}
                 className="w-full h-full object-contain"

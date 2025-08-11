@@ -86,7 +86,6 @@ CREATE TABLE "videos" (
 	CONSTRAINT "videos_pk_id" PRIMARY KEY("id")
 );
 --> statement-breakpoint
-ALTER TABLE "user_auth_providers" ADD CONSTRAINT "user_auth_providers_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_auth_providers" ADD CONSTRAINT "user_auth_providers_fk_user" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "clips" ADD CONSTRAINT "clips_fk_user" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "audios" ADD CONSTRAINT "audios_fk_clip" FOREIGN KEY ("id") REFERENCES "public"."clips"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

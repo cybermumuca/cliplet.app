@@ -83,7 +83,6 @@ S3_ENDPOINT=https://s3.amazonaws.com
 S3_ACCESS_KEY_ID=sua_access_key
 S3_SECRET_ACCESS_KEY=sua_secret_key
 S3_BUCKET_NAME=cliplet-storage
-S3_PUBLIC_URL=https://seu-bucket.s3.amazonaws.com
 ```
 
 ### 4. Configure o GitHub OAuth
